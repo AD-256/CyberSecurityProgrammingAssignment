@@ -1,9 +1,13 @@
 import re
-import _mysql_connector
+import sqlite3
 import functions
 
+userDataDB = sqlite3.connect("userData.db")
+
+print ("Would you like to ")
 functions.ynInput()
 
+print("Input your new password")
 passwordAttempt = input()
 
 if re.search(".{13,}",passwordAttempt):#Strong
