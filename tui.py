@@ -7,6 +7,8 @@ from textual.widgets import Button, Label, Footer, Header, Input
 
 InfoScreenOption = 1
 
+logi.DBCheck()
+
 class InfoScreen(Screen):
     def compose(self):
         yield Header()
@@ -71,7 +73,7 @@ Your Password must have at least:
 A total length of 8
 1 Uppercase letter
 1 Lowercase letter
-1 Numer
+1 Number
 1 Symbol
 """
 class SignupScreen(Screen):
@@ -96,8 +98,15 @@ class SignupScreen(Screen):
         )
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "SignupSubmit":
-            self.query_one("#errmsg", Label).update(f"[bold green]Account Created!")
-            logi.Signup(self.query_one("#SignupUN", Input).value,self.query_one("#SignupPW", Input).value)
+            x = logi.Signup(self.query_one("#SignupUN", Input).value,self.query_one("#SignupPW", Input).value)
+            if x == 409:
+                self.query_one("#errmsg", Label).update(f"[bold red]ERROR: An Accout Called {self.query_one("#SignupUN", Input).value} Already Exists")
+            elif x == 0:
+                self.query_one("#errmsg", Label).update(f"[bold green]Account Created!")
+            elif x == 1:
+                self.query_one("#errmsg", Label).update(f"[bold green]Account Created! [yellow]However, Your Password Is Weak")
+            elif x == 411:
+                self.query_one("#errmsg", Label).update(f"[bold red]ERROR: Your Password Does Not Meet The Listed Requirements")
             
         elif event.button.id == "Back":
             self.app.pop_screen()
