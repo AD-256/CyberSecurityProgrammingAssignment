@@ -22,11 +22,12 @@ Screen {
 
 Vertical {
     border: ascii green;
-    height: 20;
+    height: 22;
     padding:0;
     margin:0;
     align: center top;
     content-align: center top;
+    text-align: center;
 }
 
 Horizontal {

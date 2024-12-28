@@ -1,9 +1,9 @@
+import logi
 from textual.app import App
 from textual import events
 from textual.screen import Screen, ModalScreen
 from textual.containers import Container, Horizontal, Vertical
 from textual.widgets import Button, Label, Footer, Header, Input
-
 
 InfoScreenOption = 1
 
@@ -11,6 +11,7 @@ class InfoScreen(Screen):
     def compose(self):
         yield Header()
         yield Footer()
+        global InfoScreenOption
         
         if InfoScreenOption == 1:
             yield Container(
@@ -35,6 +36,9 @@ class InfoScreen(Screen):
         if event.button.id == "Back":
             self.app.pop_screen()
 
+LoginText = """\
+Welcome to the Log in page! Here you can enter your account.
+"""
 class LoginScreen(Screen):
     def compose(self):
         yield Header()
@@ -42,20 +46,20 @@ class LoginScreen(Screen):
 
         yield Container(
             Vertical(
-                Label("Test"),
+                Label(LoginText),
                 Input(placeholder="Username", type="text"),
                 Input(placeholder="Password", type="text"),
                 id="dialog"
             ),
 
             Horizontal(
-                Button("Submit",id="SubmitLogin"),
+                Button("Submit",id="LoginSubmit"),
                 Button("Back",id="Back",variant="error")
             ),
             id="maincontain"
         )
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "SubmitLogin":
+        if event.button.id == "LoginSubmit":
             print("hh")
         elif event.button.id == "Back":
             self.app.pop_screen()
@@ -78,26 +82,27 @@ class SignupScreen(Screen):
         yield Container(
             Vertical(
                 Label(SignupText),
-                Input(placeholder="Username", type="text"),
-                Input(placeholder="Password", type="text"),
+                Label("",id="errmsg"),
+                Input(placeholder="Username", type="text",id="SignupUN"),
+                Input(placeholder="Password", type="text",id="SignupPW",password=True),
                 id="dialog"
             ),
 
             Horizontal(
-                Button("Submit",id="SubmitSignup"),
+                Button("Submit",id="SignupSubmit"),
                 Button("Back",id="Back",variant="error")
             ),
             id="maincontain"
         )
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "SubmitSignup":
-            print("hh")
+        if event.button.id == "SignupSubmit":
+            self.query_one("#errmsg", Label).update(f"[bold green]Account Created!")
+            logi.Signup(self.query_one("#SignupUN", Input).value,self.query_one("#SignupPW", Input).value)
+            
         elif event.button.id == "Back":
             self.app.pop_screen()
-        
     
-
-
+        
 IntroText = """\
 Welcome to the Esports Cyber App, Designed to keep you safe.
 """
@@ -130,6 +135,7 @@ class EsportsApp(App):
         
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        global InfoScreenOption
         if event.button.id == "exit":
             EsportsApp.exit(self)
         elif event.button.id == "login":
@@ -137,11 +143,9 @@ class EsportsApp(App):
         elif event.button.id == "signup":
             self.push_screen(SignupScreen())
         elif event.button.id == "safecomms":
-            global InfoScreenOption
             InfoScreenOption = 1
             self.push_screen(InfoScreen())
         elif  event.button.id == "incident":
-            global InfoScreenOption
             InfoScreenOption = 2
             self.push_screen(InfoScreen())
 
