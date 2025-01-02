@@ -1,46 +1,75 @@
-# Screen
 Screen {
     align: center middle;
 }
 
-# Containers
+* {
+    color: green;
+    background: black;
+}
+
 #maincontain {
-    align: center middle;
-    height: 100%;
     margin: 4 8;
-    background: $panel;
-    color: $text;
-    /*border:tall $background;*/
-    border: ascii yellow;
     overflow-y:scroll;
 }
 
-#maincontain * {
-    margin: 1 2;
-    
-}
-
+# Groups
 Vertical {
-    border: ascii green;
-    height: 22;
-    padding:0;
-    margin:0;
+    # align: center top;
+    # height: auto;
+    # dock: top;
+    # dock: top;
+    height: auto;
+    width: 100%;
     align: center top;
     content-align: center top;
-    text-align: center;
 }
-
-Horizontal {
-    height: 6;
-    padding:0;
-    margin:0;
-    border: ascii red;
-    align: center bottom;
-    content-align: center bottom;
+Horizontal.Buttons {
+    # align: center bottom;
+    # max-height: 3;
+    # dock: bottom;
+    height: 3;
+    width: 100%;
+    align-horizontal: center;
 }
 
 # Widgets
 Input {
-    margin: 5 0;
-    width: 50%;
+    border:heavy green;
+    text-align: center;
+    align: center top;
+    max-width: 50%;
+}
+Input:focus {
+    border: blue;
+    color: blue;
+}
+Input:focus > * {
+    color: blue;
+}
+Placeholder{
+    border: blue;
+    color: blue;
+}
+Label {
+    align: center top;
+    # text-align: center;
+    content-align: center top;
+    width: auto;
+}
+Button {
+    border:heavy green;
+    color: green;
+    background: black;
+}
+Button:focus {
+    border: blue;
+    color: blue;
+}
+Button.Exit {
+    border: red;
+    color: red;
+}
+Button.Exit:focus {
+    border: blue;
+    color: blue;
 }

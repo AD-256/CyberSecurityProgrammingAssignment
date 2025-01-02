@@ -3,8 +3,8 @@
 import sqlite3, os, re, secrets, hashlib
 
 CONST_PEPPER = "a160e1259fb5bdbdc7ef315fd78ad840"
-DBFile = "2024-25_USW_Cyber_Esports_App.db"
-UserDataDB = sqlite3.connect(DBFile)
+CONST_DB_FILE = "Esports Cyber App DataBase.db"
+UserDataDB = sqlite3.connect(CONST_DB_FILE)
 UserDataDB.autocommit = True
 DBCur = UserDataDB.cursor()
 
@@ -13,10 +13,10 @@ regexWeak = re.compile(r"(?=.{8,})(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*\d){1,
 
 def DBCheck() -> None:
     # Make file
-    if os.path.isfile(DBFile) and os.access(DBFile, os.R_OK):
+    if os.path.isfile(CONST_DB_FILE) and os.access(CONST_DB_FILE, os.R_OK):
         ...
     else:
-        open(DBFile,"w").close()
+        open(CONST_DB_FILE,"w").close()
 
     # Make DB
     TableMaker = """
@@ -36,24 +36,19 @@ def CheckForUser(User: str) -> bool:
     WHERE unowen = ?
     ;"""
     return DBCur.execute(sql, (User,)).fetchone() != None
-    ...
 
 def Login(UNOwen: str,PWOwen: str) -> int:
     if CheckForUser(UNOwen):
-        salt = DBCur.execute("")
+        salt = DBCur.execute("SELECT salt FROM userdata WHERE unowen = ?",(UNOwen,)).fetchone()[0]
         PWOwenCrypt = hashlib.sha3_512(bytes(str(PWOwen+CONST_PEPPER+salt), encoding='utf-8'),usedforsecurity=True).hexdigest()
-        ...
-    else:
-        #error
-        return 404
-        ...
-
-    ...
+        if PWOwenCrypt == DBCur.execute("SELECT hash FROM userdata WHERE unowen = ?",(UNOwen,)).fetchone()[0]:
+            return 0 # Password is right
+        else: return 411 # Password is wrong
+    else: return 404 # No account
 
 def Signup(UNOwen: str,PWOwen: str) -> int:
-    
     if CheckForUser(UNOwen):
-        return 409 # error
+        return 409 # User already exists
     else:
         if regexWeak.match(PWOwen) != None: # Weak
             salt = secrets.token_hex(16)
@@ -64,3 +59,5 @@ def Signup(UNOwen: str,PWOwen: str) -> int:
             else:return 1 # Weak Password
 
         else:return 411 # Invalid PW
+
+#Login("alfie", "AlfieLovesBacon123!\"")
