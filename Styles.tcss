@@ -10,6 +10,9 @@ Screen {
 #maincontain {
     margin: 4 8;
     overflow-y:scroll;
+    scrollbar-color: green;
+    scrollbar-color-active: blue;
+    scrollbar-color-hover: blue;
 }
 
 # Groups
@@ -31,7 +34,10 @@ Horizontal.Buttons {
     width: 100%;
     align-horizontal: center;
 }
-
+Horizontal {
+    width: 100%;
+    align-horizontal: center;
+}
 # Widgets
 Input {
     border:heavy green;

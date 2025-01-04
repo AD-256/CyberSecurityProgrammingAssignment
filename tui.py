@@ -21,12 +21,23 @@ class FunctionScreen(Screen):
         super().__init__(name, id, classes)
 
         self.user = username
-    
+
+    def update_buttons(self):
+        
+        if logi.CheckForMFA(self.user) == None:
+            self.query_one("#Toggle", Button).label = "Enable MFA"
+            self.query_one("#KeyLabel", Label).update("")
+        else:
+            self.query_one("#Toggle", Button).label = "Disable MFA"
+            self.query_one("#KeyLabel", Label).update(f"MFA Key:\n{logi.CheckForMFA(self.user)}\nKEEP THIS SAFE INSIDE YOUR AUTHENTICATOR")
+
     def compose(self):
+
         FunctionText = f"""
         Hello {self.user} Welcome to the Esports Cyber App!
         Here you can enable 2FA using your mobile.
         """
+        
         yield Header(icon="")
 
         yield Container(
@@ -35,25 +46,56 @@ class FunctionScreen(Screen):
                 id="dialog"),
 
                 Horizontal(
+                        Button("Enable MFA", id="Toggle"),
+                        Label(f"MFA Key:\n{logi.CheckForMFA(self.user)}\nKEEP THIS SAFE INSIDE YOUR AUTHENTICATOR",id="KeyLabel")
+                ),
+                
+                Horizontal(
                     Button("Logout",id="Back",classes="Exit"),
                 classes="Buttons"),
                 id="maincontain")
-
+        
+    def on_mount(self, event):
+            self.update_buttons()
+    
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "Back":
             self.app.pop_screen()
-
-
+        elif event.button.id == "Toggle":
+            if logi.CheckForMFA(self.user) is None:
+                logi.EnableMFA(self.user)
+                
+            else:
+                logi.DisableMFA(self.user)
+            self.update_buttons()
 
 class InfoScreen(Screen):
+
+    def __init__(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        option: str = 1,
+    ) -> None:
+        super().__init__(name, id, classes)
+
+        self.option = option
 
     def compose(self):
 
         SafeCommsText = """
-        safecomms
+        Safe Communication Online.
+
+        1, Never share your password.
+        2, Never share any personal data like home address or phone number
+        3, Definitely never share any banking details or data such as your National Insurance Number
         """
+
         IncidentText = """
-        incident
+        Incident Response and Recovery Plans
+        addressing security breaches
+        recovery procedures to minimize downtime and user impact
         Lorem
         Ipsum
         Dolor
@@ -61,17 +103,14 @@ class InfoScreen(Screen):
 
         yield Header(icon="")
 
-        global InfoScreenOption
-
-        x = None
-
-        if InfoScreenOption == 1:
-            x = SafeCommsText
+        if self.option == 1:
+            self.option = SafeCommsText
         else:
-            x = IncidentText
+            self.option = IncidentText
+
         yield Container(
             Vertical(
-                Label(x),
+                Label(self.option),
             id="dialog"),
 
             Horizontal(
@@ -84,6 +123,10 @@ class InfoScreen(Screen):
             self.app.pop_screen()
 
 class LoginScreen(Screen):
+
+    def update_inputs(self):
+        if logi.CheckForMFA(self.query_one("#LoginUN", Input).value) == None:self.query_one("#LoginMFA", Input).display = False
+        else:self.query_one("#LoginMFA", Input).display = True
 
     def compose(self):
 
@@ -102,6 +145,7 @@ class LoginScreen(Screen):
                 Vertical(
                     Input(placeholder="Username",id="LoginUN", type="text"),
                     Input(placeholder="Password",id="LoginPW", type="text",password=True),
+                    Input(placeholder="MFA Token",id="LoginMFA", type="text")
                 ),
                 id="dialog"
             ),
@@ -113,11 +157,21 @@ class LoginScreen(Screen):
             id="maincontain"
         )
 
+    def on_mount(self, event):
+            self.update_inputs()
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "LoginSubmit":
-            x = logi.Login(self.query_one("#LoginUN", Input).value,self.query_one("#LoginPW", Input).value)
+            username = self.query_one("#LoginUN", Input).value
+            password = self.query_one("#LoginPW", Input).value
+            x = logi.Login(username,password)
             if x == 0:
-                self.app.push_screen(FunctionScreen(username=self.query_one("#LoginUN", Input).value))
+                self.update_inputs()
+                if logi.CheckForMFA(username) == None:
+                    self.app.push_screen(FunctionScreen(username=username))
+                else:
+                    if logi.MFALogin(username,password,self.query_one("#LoginMFA", Input).value):
+                        self.app.push_screen(FunctionScreen(username=username))
             elif x == 411:
                 self.query_one("#errmsg", Label).update(f"[bold red]ERROR: Incorrect Credentials")
             elif x == 404:
@@ -219,11 +273,9 @@ class EsportsApp(App):
         elif event.button.id == "signup":
             self.push_screen(SignupScreen())
         elif event.button.id == "safecomms":
-            InfoScreenOption = 1
-            self.push_screen(InfoScreen())
+            self.push_screen(InfoScreen(option=1))
         elif  event.button.id == "incident":
-            InfoScreenOption = 2
-            self.push_screen(InfoScreen())
+            self.push_screen(InfoScreen(option=2))
 
 if __name__ == "__main__":
     app = EsportsApp()
