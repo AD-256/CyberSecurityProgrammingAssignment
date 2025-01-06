@@ -33,10 +33,8 @@ class FunctionScreen(Screen):
 
     def compose(self):
 
-        FunctionText = f"""
-        Hello {self.user} Welcome to the Esports Cyber App!
-        Here you can enable 2FA using your mobile.
-        """
+        FunctionText = f"""Hello {self.user} Welcome to the Esports Cyber App!
+Here you can enable 2FA using your mobile."""
         
         yield Header(icon="")
 
@@ -84,22 +82,18 @@ class InfoScreen(Screen):
 
     def compose(self):
 
-        SafeCommsText = """
-        Safe Communication Online.
+        SafeCommsText = """Safe Communication Online.
+1, Never share your password. Otherwise hackers can easily access your accounts.
+2, Never share any personal data like home address or phone number as it could result in being hacked, scammed or being stalked.
+3, Definitely never share any banking details or data such as your National Insurance Number."""
 
-        1, Never share your password.
-        2, Never share any personal data like home address or phone number
-        3, Definitely never share any banking details or data such as your National Insurance Number
-        """
+        IncidentText = """Incident Response and Recovery Plans
 
-        IncidentText = """
-        Incident Response and Recovery Plans
-        addressing security breaches
-        recovery procedures to minimize downtime and user impact
-        Lorem
-        Ipsum
-        Dolor
-        """
+Addressing Security Breaches / Recovery Procedures To Minimize Downtime And User Impact
+
+1, In the event of a password being leaked, you are advised to change it immediatly.
+2, If personal data has been leaked, you are advised to check with your bank, government and any others.
+3, In the event of any form of databreach, you need to contact the ICO (Information Commissioner's Office) [bold]Immediatly."""
 
         yield Header(icon="")
 
@@ -130,9 +124,7 @@ class LoginScreen(Screen):
 
     def compose(self):
 
-        LoginText = """\
-        Welcome to the Log in page! Here you can enter your account.
-        """
+        LoginText = """Welcome to the Log in page! Here you can enter your account."""
 
         yield Header(icon="")
 
@@ -166,12 +158,15 @@ class LoginScreen(Screen):
             password = self.query_one("#LoginPW", Input).value
             x = logi.Login(username,password)
             if x == 0:
-                self.update_inputs()
                 if logi.CheckForMFA(username) == None:
                     self.app.push_screen(FunctionScreen(username=username))
                 else:
-                    if logi.MFALogin(username,password,self.query_one("#LoginMFA", Input).value):
-                        self.app.push_screen(FunctionScreen(username=username))
+                    if self.query_one("#LoginMFA", Input).display == True:
+                        if logi.MFALogin(username,password,self.query_one("#LoginMFA", Input).value):
+                            self.app.push_screen(FunctionScreen(username=username))
+                        else:
+                            self.query_one("#errmsg", Label).update(f"[bold red]ERROR: Incorrect Token")
+                self.update_inputs()
             elif x == 411:
                 self.query_one("#errmsg", Label).update(f"[bold red]ERROR: Incorrect Credentials")
             elif x == 404:
@@ -183,16 +178,13 @@ class SignupScreen(Screen):
 
     def compose(self):
 
-        SignupText = """
-        Welcome to the Sign up page! Here you can create an account.
-
-        Your Password must have at least:
-        A total length of 8
-        1 Uppercase letter
-        1 Lowercase letter
-        1 Number
-        1 Symbol
-        """
+        SignupText = """Welcome to the Sign up page! Here you can create an account.
+Your Password must have at least:
+A total length of 8
+1 Uppercase letter
+1 Lowercase letter
+1 Number
+1 Symbol"""
 
         yield Header(icon="")
 
@@ -239,9 +231,7 @@ class EsportsApp(App):
 
     def compose(self):
 
-        IntroText = """\
-        Welcome to the Esports Cyber App, Designed to keep you safe.
-        """
+        IntroText = """Welcome to the Esports Cyber App, Designed to keep you safe."""
 
         self.title = "Esports Cyber App"
         self.ENABLE_COMMAND_PALETTE = False

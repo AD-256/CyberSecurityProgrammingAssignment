@@ -1,6 +1,6 @@
 # This file contains most of the logic of the Esports Cyber App
 
-import sqlite3, os, re, secrets, hashlib, pyotp, time
+import sqlite3, os, re, secrets, hashlib, pyotp
 
 #Constants & Variables
 CONST_PEPPER = "a160e1259fb5bdbdc7ef315fd78ad840"
@@ -75,7 +75,8 @@ def Signup(UNOwen: str,PWOwen: str) -> int:
 #MFA
 def EnableMFA(User: str) -> str:
     if DBCur.execute("SELECT mfa FROM userdata WHERE unowen = ?;",(User,)).fetchone()[0] == None:
-        DBCur.execute("UPDATE userdata SET mfa = ? WHERE unowen = ?",(pyotp.random_base32(),User))
+        Secret = pyotp.random_base32()
+        DBCur.execute("UPDATE userdata SET mfa = ? WHERE unowen = ?",(Secret,User))
         ...
 
 def DisableMFA(User: str) -> None:
@@ -89,7 +90,6 @@ def MFALogin(User: str,Password: str,MFAToken: str) -> None:
         totp = pyotp.TOTP(CheckForMFA(User))
         totp.now()
         return totp.verify(MFAToken)
-    else:print("Wtf?!?!")
 
 #Login("alfie", "AlfieLovesBacon123!\"")
 #print(CheckForMFA("alfie"))
